@@ -35,10 +35,19 @@ export default function Reader() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sentence: text }),
       });
-      const body = await res.json();
+      // 서버가 죽으면 JSON이 아니라 빈 응답이 온다. 그대로 파싱하면
+      // 화면에 아무 것도 뜨지 않은 채 멈춘다.
+      const raw = await res.text();
+      let body: { error?: string; needCode?: boolean } & Analysis;
+      try {
+        body = JSON.parse(raw);
+      } catch {
+        throw new Error(`서버 오류 (${res.status}). 잠시 후 다시 시도해 주세요.`);
+      }
+
       if (!res.ok) {
         if (body.needCode) setNeedCode(true);
-        throw new Error(body.error ?? "분석에 실패했습니다.");
+        throw new Error(body.error ?? `분석에 실패했습니다 (${res.status}).`);
       }
       setAnalysis(body);
     } catch (e) {

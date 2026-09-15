@@ -89,6 +89,22 @@ const SYSTEM = `당신은 한국 대학 중어중문학과의 시사 중국어 �
 const cache = new Map<string, Analysis>();
 
 export async function POST(req: Request) {
+  try {
+    return await handle(req);
+  } catch (error) {
+    // 핸들러 어디서 터지든 JSON으로 돌려준다. 그대로 던지면 배포 환경에서
+    // 본문이 빈 500이 나가 원인을 알 수 없다.
+    console.error("분석 실패", error);
+    return NextResponse.json(
+      {
+        error: `예상치 못한 오류: ${error instanceof Error ? error.message : String(error)}`,
+      },
+      { status: 500 },
+    );
+  }
+}
+
+async function handle(req: Request) {
   const denied = await requireClassAccess();
   if (denied) return denied;
 
@@ -195,6 +211,7 @@ export async function POST(req: Request) {
         { status: 502 },
       );
     }
+
     throw error;
   }
 }
