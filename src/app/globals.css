@@ -1,26 +1,55 @@
 @import "tailwindcss";
 
+/* 주간(기본). 순백 대신 미색을 써서 눈부심을 줄인다. */
+@theme {
+  --color-paper: #f7f3ee; /* 페이지 바탕 */
+  --color-surface: #fffdfa; /* 카드 */
+  --color-line: #e2d8cd; /* 구분선 */
+
+  --color-ink: #2a1c15; /* 본문 */
+  --color-muted: #6b5a4d; /* 보조 설명 */
+  --color-faint: #7d6a5a; /* 병음, 카운터 */
+
+  --color-accent: #9a4a12; /* 搭配 */
+  --color-highlight: #f7e3c8; /* 재생 중인 덩어리 */
+  --color-danger: #b3261e; /* 오류 */
+
+  --font-han: "PingFang SC", "Hiragino Sans GB", "Noto Sans SC",
+    "Microsoft YaHei", system-ui, sans-serif;
+}
+
+/* 야간. 다크 초콜릿 바탕 */
+[data-theme="dark"] {
+  --color-paper: #2a1c15;
+  --color-surface: #372822;
+  --color-line: #4d3a31;
+
+  --color-ink: #f7f0ea;
+  --color-muted: #cdbbad;
+  --color-faint: #ab998a;
+
+  --color-accent: #f0a868;
+  --color-highlight: #5c4130;
+  --color-danger: #ffa89e;
+}
+
+/* 셀렉트·슬라이더 같은 기본 컨트롤도 테마를 따라가게 한다 */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+[data-theme="dark"] {
+  color-scheme: dark;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard",
+    "Malgun Gothic", system-ui, sans-serif;
+}
+
+.han {
+  font-family: var(--font-han);
 }
