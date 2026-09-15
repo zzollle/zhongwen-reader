@@ -129,11 +129,17 @@ async function handle(req: Request) {
 
   // 키를 붙여넣을 때 안내 문구나 줄바꿈이 딸려 오는 일이 잦다. 그대로 두면
   // HTTP 헤더를 만들 때 터지면서 원인을 알 수 없는 오류가 난다.
-  if (!/^[\x21-\x7e]+$/.test(apiKey)) {
+  // 무엇이 섞였는지 짚어주되 키 자체는 드러내지 않는다.
+  const badIndex = [...apiKey].findIndex((c) => c.charCodeAt(0) < 33 || c.charCodeAt(0) > 126);
+  if (badIndex >= 0) {
+    const bad = apiKey[badIndex];
+    const code = bad.charCodeAt(0).toString(16).toUpperCase().padStart(4, "0");
     return NextResponse.json(
       {
         error:
-          "ANTHROPIC_API_KEY에 공백이나 한글 같은 문자가 섞여 있습니다. 키 값만 다시 넣어 주세요.",
+          `ANTHROPIC_API_KEY에 키가 아닌 문자가 섞여 있습니다. ` +
+          `전체 ${apiKey.length}자 중 ${badIndex + 1}번째가 '${bad}'(U+${code})입니다. ` +
+          `정상적인 키는 108자이고 sk-ant-api03-로 시작합니다.`,
       },
       { status: 503 },
     );
