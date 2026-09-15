@@ -98,7 +98,6 @@ export async function POST(req: Request) {
     return NextResponse.json(
       {
         error: `예상치 못한 오류: ${error instanceof Error ? error.message : String(error)}`,
-        stack: error instanceof Error ? error.stack?.split("\n").slice(0, 12) : undefined,
       },
       { status: 500 },
     );
@@ -120,9 +119,22 @@ async function handle(req: Request) {
       { status: 400 },
     );
   }
-  if (!process.env.ANTHROPIC_API_KEY) {
+  const apiKey = process.env.ANTHROPIC_API_KEY?.trim();
+  if (!apiKey) {
     return NextResponse.json(
       { error: "서버에 ANTHROPIC_API_KEY가 설정되지 않았습니다." },
+      { status: 503 },
+    );
+  }
+
+  // 키를 붙여넣을 때 안내 문구나 줄바꿈이 딸려 오는 일이 잦다. 그대로 두면
+  // HTTP 헤더를 만들 때 터지면서 원인을 알 수 없는 오류가 난다.
+  if (!/^[\x21-\x7e]+$/.test(apiKey)) {
+    return NextResponse.json(
+      {
+        error:
+          "ANTHROPIC_API_KEY에 공백이나 한글 같은 문자가 섞여 있습니다. 키 값만 다시 넣어 주세요.",
+      },
       { status: 503 },
     );
   }
@@ -134,7 +146,7 @@ async function handle(req: Request) {
   const hit = cache.get(key);
   if (hit) return NextResponse.json(hit);
 
-  const client = new Anthropic();
+  const client = new Anthropic({ apiKey });
 
   try {
     const response = await client.messages.parse({
