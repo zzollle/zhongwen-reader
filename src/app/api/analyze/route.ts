@@ -98,6 +98,7 @@ export async function POST(req: Request) {
     return NextResponse.json(
       {
         error: `예상치 못한 오류: ${error instanceof Error ? error.message : String(error)}`,
+        stack: error instanceof Error ? error.stack?.split("\n").slice(0, 12) : undefined,
       },
       { status: 500 },
     );
