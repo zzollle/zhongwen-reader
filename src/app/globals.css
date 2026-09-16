@@ -13,6 +13,7 @@
   --color-accent: #9a4a12; /* 搭配 */
   --color-highlight: #f7e3c8; /* 재생 중인 덩어리 */
   --color-danger: #b3261e; /* 오류 */
+  --color-glow: #f0e2d0; /* 바탕에 깔리는 옅은 빛 */
 
   --font-han: "PingFang SC", "Hiragino Sans GB", "Noto Sans SC",
     "Microsoft YaHei", system-ui, sans-serif;
@@ -31,6 +32,7 @@
   --color-accent: #f0a868;
   --color-highlight: #5c4130;
   --color-danger: #ffa89e;
+  --color-glow: #3d2a1f;
 }
 
 /* 셀렉트·슬라이더 같은 기본 컨트롤도 테마를 따라가게 한다 */
@@ -43,7 +45,15 @@
 }
 
 body {
-  background: var(--color-paper);
+  background-color: var(--color-paper);
+  /* 위쪽에서 은은하게 퍼지는 빛. 스크롤해도 따라오지 않게 고정한다 */
+  background-image: radial-gradient(
+    56rem 32rem at 50% -6rem,
+    var(--color-glow),
+    transparent 70%
+  );
+  background-repeat: no-repeat;
+  background-attachment: fixed;
   color: var(--color-ink);
   font-family:
     -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard",

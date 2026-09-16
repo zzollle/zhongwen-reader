@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Hero from "./Hero";
 import Playback from "./Playback";
 import Structure from "./Structure";
 import ThemeToggle from "./ThemeToggle";
@@ -148,6 +149,8 @@ export default function Reader() {
           {error}
         </p>
       )}
+
+      {!analysis && !loading && !needCode && <Hero />}
 
       {analysis && (
         <div className="space-y-5">
