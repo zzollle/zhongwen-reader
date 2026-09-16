@@ -1,10 +1,25 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
+const DESCRIPTION =
+  "중국어 문장을 넣으면 해석을 하고 구조를 분석합니다. 그리고 의미 단위로 끊어 읽기합니다.";
+
 export const metadata: Metadata = {
+  // 공유 카드의 이미지 주소가 절대경로가 되려면 필요하다
+  metadataBase: new URL("https://zhongwen-reader.vercel.app"),
   title: "미디어 중국어 독해",
-  description:
-    "중국어 문장을 넣으면 해석을 하고 구조를 분석합니다. 그리고 의미 단위로 끊어 읽기합니다.",
+  description: DESCRIPTION,
+  openGraph: {
+    title: "미디어 중국어 독해",
+    description: DESCRIPTION,
+    type: "website",
+    locale: "ko_KR",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "미디어 중국어 독해",
+    description: DESCRIPTION,
+  },
 };
 
 // React가 그리기 전에 테마를 적용해야 화면이 한 번 번쩍이지 않는다.
