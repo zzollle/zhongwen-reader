@@ -63,3 +63,12 @@ body {
 .han {
   font-family: var(--font-han);
 }
+
+/* 상단 배너. 주간·야간 모두 토큰을 따라간다 */
+.banner {
+  background-image: linear-gradient(
+    160deg,
+    var(--color-glow),
+    var(--color-surface) 78%
+  );
+}

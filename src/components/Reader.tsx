@@ -75,12 +75,24 @@ export default function Reader() {
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
-      <header className="mb-8 text-center">
-        <div className="mb-2 flex justify-end">
-          <ThemeToggle />
+      <div className="mb-3 flex justify-end">
+        <ThemeToggle />
+      </div>
+
+      {/* 공유 카드와 같은 인상을 주는 배너 */}
+      <header className="banner mb-8 overflow-hidden rounded-lg border border-line px-5 py-10 text-center sm:px-8 sm:py-12">
+        <div
+          aria-hidden
+          className="han mx-auto mb-6 flex size-16 items-center justify-center rounded-2xl border-2 border-accent text-4xl leading-none text-accent sm:size-20 sm:text-5xl"
+        >
+          读
         </div>
+
         <h1 className="text-2xl font-semibold sm:text-3xl">미디어 중국어 독해</h1>
-        <p className="mt-2 text-sm text-muted">
+
+        <div className="mx-auto mt-4 h-1 w-16 rounded-full bg-accent" />
+
+        <p className="mx-auto mt-4 max-w-md text-sm text-muted">
           중국어 문장을 넣으면 해석을 하고 구조를 분석합니다. 그리고 의미 단위로 끊어
           읽기합니다.
         </p>
