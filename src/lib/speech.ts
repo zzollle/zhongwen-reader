@@ -26,8 +26,10 @@ const FEMALE = [
   "Microsoft Huihui", // Windows 10
   "Microsoft Yaoyao",
   "Microsoft Xiaoxiao", // Windows 11 / Edge
-  "Shelley", // macOS 보조
+  "Shelley", // macOS 캐릭터 음성 — 기기에 따라 없을 수 있다
   "Sandy",
+  "Flo",
+  "Grandma",
 ];
 
 const MALE = [
@@ -37,6 +39,7 @@ const MALE = [
   "Eddy", // macOS — 본토 전용 남성 음성이 없어 캐릭터 음성을 쓴다
   "Reed",
   "Rocko",
+  "Grandpa",
 ];
 
 /** "Eddy (중국어(중국 본토))" → "Eddy" */
@@ -85,14 +88,15 @@ export function useChineseVoices(): VoiceOption[] {
       if (female) picked.push({ voice: female, label: `여성 · ${shortName(female)}` });
       if (male) picked.push({ voice: male, label: `남성 · ${shortName(male)}` });
 
-      // 후보를 하나도 못 찾는 기기에서는 설치된 본토 음성을 그대로 쓴다.
-      setOptions(
-        picked.length
-          ? picked
-          : mainland
-              .slice(0, 2)
-              .map((voice) => ({ voice, label: shortName(voice) })),
-      );
+      // 기기마다 설치된 음성이 달라 한쪽만 잡히는 일이 잦다. 그럴 때는 남은
+      // 본토 음성으로 자리를 채우되, 성별을 단정하지 않고 이름만 보여준다.
+      for (const voice of mainland) {
+        if (picked.length >= 2) break;
+        if (picked.some((p) => p.voice.voiceURI === voice.voiceURI)) continue;
+        picked.push({ voice, label: shortName(voice) });
+      }
+
+      setOptions(picked);
     };
 
     load();
