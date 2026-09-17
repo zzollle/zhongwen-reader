@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { logEvent } from "@/lib/logging";
 import { makeUtterance, speak, useSpeechSupported, type VoiceOption } from "@/lib/speech";
 import type { Chunk } from "@/lib/types";
 
@@ -66,6 +67,7 @@ export default function Playback({
   /** 덩어리를 한꺼번에 큐에 넣는다. 사이에 끊김이 가장 적다. */
   const playAll = () =>
     run(async () => {
+      logEvent("play_all", { rate, chunks: chunks.length });
       const last = chunks.length - 1;
       await new Promise<void>((resolve, reject) => {
         chunks.forEach((chunk, i) => {
@@ -85,12 +87,14 @@ export default function Playback({
 
   const playOne = (i: number) =>
     run(async () => {
+      logEvent("play_chunk", { rate, index: i, text: chunks[i].text });
       setActive(i);
       await speak(makeUtterance(chunks[i].text, voice, rate));
     });
 
   const playByChunk = () =>
     run(async () => {
+      logEvent("play_by_chunk", { rate, breakMs, chunks: chunks.length });
       for (let i = 0; i < chunks.length; i++) {
         if (stopped.current) return;
         setActive(i);

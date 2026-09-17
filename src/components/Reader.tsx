@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import ConsentCard, { LoggingSettings } from "./ConsentCard";
 import Hero from "./Hero";
 import Playback from "./Playback";
 import Structure from "./Structure";
@@ -8,6 +9,7 @@ import ThemeToggle from "./ThemeToggle";
 import Vocab from "./Vocab";
 import sample from "@/data/sample.json";
 import { MAX_CHARS } from "@/lib/limits";
+import { logEvent } from "@/lib/logging";
 import { useChineseVoices } from "@/lib/speech";
 import type { Analysis } from "@/lib/types";
 
@@ -51,6 +53,11 @@ export default function Reader() {
         throw new Error(body.error ?? `분석에 실패했습니다 (${res.status}).`);
       }
       setAnalysis(body);
+      logEvent("analyze", {
+        sentence: text,
+        chunks: body.chunks.length,
+        vocabulary: body.vocabulary.length,
+      });
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -78,6 +85,8 @@ export default function Reader() {
       <div className="mb-3 flex justify-end">
         <ThemeToggle />
       </div>
+
+      <ConsentCard />
 
       {/* 공유 카드와 같은 인상을 주는 배너 */}
       <header className="banner mb-8 overflow-hidden rounded-lg border border-line px-5 py-10 text-center sm:px-8 sm:py-12">
@@ -195,6 +204,8 @@ export default function Reader() {
           />
         </div>
       )}
+
+      <LoggingSettings />
     </main>
   );
 }

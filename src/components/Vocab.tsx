@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { logEvent } from "@/lib/logging";
 import { makeUtterance, speak } from "@/lib/speech";
 import type { VocabItem } from "@/lib/types";
 
@@ -21,7 +22,8 @@ type Props = {
 export default function Vocab({ items, voice, rate, canSpeak }: Props) {
   const [speaking, setSpeaking] = useState<string | null>(null);
 
-  async function say(text: string) {
+  async function say(text: string, kind: "play_word" | "play_collocation") {
+    logEvent(kind, { rate, text });
     window.speechSynthesis.cancel();
     setSpeaking(text);
     try {
@@ -57,7 +59,7 @@ export default function Vocab({ items, voice, rate, canSpeak }: Props) {
             <div className="flex flex-wrap items-baseline gap-x-3">
               {canSpeak ? (
                 <button
-                  onClick={() => say(item.word)}
+                  onClick={() => say(item.word, "play_word")}
                   className={`han rounded-md px-1.5 py-0.5 text-2xl transition-colors ${
                     speaking === item.word ? "bg-highlight" : "hover:bg-paper"
                   }`}
@@ -80,7 +82,7 @@ export default function Vocab({ items, voice, rate, canSpeak }: Props) {
                   canSpeak ? (
                     <button
                       key={c}
-                      onClick={() => say(c)}
+                      onClick={() => say(c, "play_collocation")}
                       className={`han rounded px-2 py-0.5 text-sm text-accent transition-colors ${
                         speaking === c ? "bg-highlight" : "bg-paper hover:bg-line"
                       }`}
