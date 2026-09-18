@@ -7,17 +7,17 @@ const DESCRIPTION =
 export const metadata: Metadata = {
   // 공유 카드의 이미지 주소가 절대경로가 되려면 필요하다
   metadataBase: new URL("https://zhongwen-reader.vercel.app"),
-  title: "미디어 중국어 독해",
+  title: "미디어 중국어 독해와 낭독 연습",
   description: DESCRIPTION,
   openGraph: {
-    title: "미디어 중국어 독해",
+    title: "미디어 중국어 독해와 낭독 연습",
     description: DESCRIPTION,
     type: "website",
     locale: "ko_KR",
   },
   twitter: {
     card: "summary_large_image",
-    title: "미디어 중국어 독해",
+    title: "미디어 중국어 독해와 낭독 연습",
     description: DESCRIPTION,
   },
 };

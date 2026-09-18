@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
-export const alt = "미디어 중국어 독해";
+export const alt = "미디어 중국어 독해와 낭독 연습";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -36,12 +36,12 @@ export default async function Image() {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            width: 132,
-            height: 132,
-            marginBottom: 44,
-            borderRadius: 32,
+            width: 112,
+            height: 112,
+            marginBottom: 32,
+            borderRadius: 28,
             border: `3px solid ${ACCENT}`,
-            fontSize: 84,
+            fontSize: 72,
             fontFamily: "NotoSC",
             color: ACCENT,
             lineHeight: 1,
@@ -50,15 +50,21 @@ export default async function Image() {
           读
         </div>
 
+        {/* 한 줄로는 카드 폭을 넘는다. 제멋대로 줄바꿈되지 않게 의미 단위로 나눈다 */}
         <div
           style={{
-            fontSize: 96,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            fontSize: 84,
+            lineHeight: 1.2,
             fontFamily: "NotoKR",
             color: INK,
             letterSpacing: -2,
           }}
         >
-          미디어 중국어 독해
+          <div>미디어 중국어</div>
+          <div>독해와 낭독 연습</div>
         </div>
 
         <div

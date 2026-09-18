@@ -1,4 +1,4 @@
-# 미디어 중국어 독해
+# 미디어 중국어 독해와 낭독 연습
 
 중어중문학과 시사 독해 수업용 웹앱. 중국어 문장을 넣으면 해석·문장 구조·새 단어를 보여주고,
 搭配 단위로 끊어서 낭독해 준다.
@@ -14,7 +14,9 @@ cp .env.example .env.local
 | 변수 | 발급처 | 비고 |
 |---|---|---|
 | `ANTHROPIC_API_KEY` | console.anthropic.com → API Keys | 독해 분석. 선불 크레딧 |
-| `CLASS_CODE` | 직접 정함 | 학생들에게 나눠줄 코드. 비우면 게이트 없음 |
+| `AZURE_SPEECH_KEY` | portal.azure.com → Speech 리소스 → 키 및 엔드포인트 | 낭독 음성. F0 무료 계층 |
+| `AZURE_SPEECH_REGION` | 위와 같은 화면 | 붙여 쓴 소문자. 예: `koreacentral` |
+| `CLASS_CODE` | 직접 정함 | 수강생·외부 이용자 구분 표시 |
 | `KNOWN_HSK_LEVEL` | 기본 `4` | 이 급수 이하는 아는 단어로 보고 제외 |
 
 키 없이도 실행은 되며, 첫 화면의 **예시 보기**로 전체 기능 화면을 볼 수 있다.
@@ -38,7 +40,8 @@ npm install && npm run dev
 
 - `src/app/api/analyze` — Claude로 해석·구조·단어 분석 (결과를 메모리에 캐싱)
 - `src/app/api/auth` — 수업 코드 확인
-- `src/lib/speech.ts` — 브라우저 내장 음성(Web Speech API) 공용 모듈. 서버를 거치지 않는다
+- `src/app/api/tts` — Azure로 음성 합성. 덩어리 사이에 SSML `<break>`를 넣는다
+- `src/lib/tts.ts` — 재생 모듈. Azure를 먼저 쓰고 실패하면 브라우저 음성으로 대체한다
 - `src/components/Playback.tsx` — 문장 낭독. 목소리·속도 조절 UI가 여기 있다
 - `src/components/Vocab.tsx` — 새 단어. 단어와 搭配를 누르면 발음된다
 
@@ -67,24 +70,19 @@ npm install && npm run dev
 
 ## 알아둘 것
 
-**낭독은 브라우저 내장 음성을 쓴다.** 키도 서버도 필요 없지만 한계가 있다.
-SSML을 못 쓰므로 덩어리를 개별 발화로 이어 붙이는 방식이라, 덩어리마다 문장 끝 억양이
-떨어진다. 음질도 OS 기본 음성 수준이다. 낭독 품질을 올리려면 Azure TTS로 바꿔야 한다
-(SSML `<break>`로 끊어읽기를 제어할 수 있다).
+**낭독은 Azure 음성을 쓴다.** 여성 晓晓(`zh-CN-XiaoxiaoNeural`), 남성 云扬
+(`zh-CN-YunyangNeural`). 모든 학생이 기기와 무관하게 같은 목소리를 듣는다.
 
-음성은 본토(zh-CN) **여성·남성 두 개만** 목록에 올린다. 대만·홍콩 음성은 제외한다.
+전체 재생은 덩어리 사이에 SSML `<break>`를 넣은 **한 문장**으로 합성해 억양이 이어진다.
+하이라이트는 글자 수 비례로 각 덩어리의 시작 시점을 어림한다. 중국어는 음절 길이가
+고른 편이라 대체로 맞지만 약간 어긋날 수 있다.
 
-윈도우와 맥에 공통으로 존재하는 음성 이름은 없으므로, `src/lib/speech.ts`의 `FEMALE`·`MALE`에
-OS별 후보를 나열해두고 그 기기에서 찾아지는 첫 번째를 쓴다. 실제로 뽑히는 조합:
+같은 문장·목소리·속도면 Vercel CDN이 오디오를 캐시해서 Azure는 한 번만 호출된다.
+F0 무료 계층은 월 50만 자이며 넘어도 청구되지 않고 멈추기만 한다.
 
-| 환경 | 여성 | 남성 |
-|---|---|---|
-| macOS | Tingting | Eddy |
-| Windows 10 + Chrome | Google 普通话 | Microsoft Kangkang |
-| Windows 11 + Edge | Microsoft Xiaoxiao | Microsoft Yunxi |
-| Android Chrome | Google 普通话 | (없음 — 여성만 표시) |
-
-후보를 하나도 못 찾으면 그 기기에 설치된 본토 음성을 그대로 쓴다.
+**Azure가 실패하면 브라우저 내장 음성으로 대체한다.** 키가 없거나 무료 한도를 넘었을 때
+소리가 끊기지 않게 하기 위해서다. 이때는 기기마다 음성이 다르고 끊어읽기 품질도 떨어진다.
+한 번 실패하면 1분간 Azure를 건너뛴다.
 
 **搭配 분절 자체는 Claude가 한다.** 가끔 오분절이 난다.
 

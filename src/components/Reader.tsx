@@ -93,7 +93,9 @@ export default function Reader() {
           读
         </div>
 
-        <h1 className="text-2xl font-semibold sm:text-3xl">미디어 중국어 독해</h1>
+        <h1 className="text-balance break-keep text-2xl font-semibold sm:text-3xl">
+          미디어 중국어 독해와 낭독 연습
+        </h1>
 
         <div className="mx-auto mt-4 h-1 w-16 rounded-full bg-accent" />
 
