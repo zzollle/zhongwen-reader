@@ -1,126 +1,85 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { logEvent } from "@/lib/logging";
-import { makeUtterance, speak, useSpeechSupported, type VoiceOption } from "@/lib/speech";
+import {
+  VOICE_OPTIONS,
+  isCurrent,
+  speakChunks,
+  startSpeech,
+  stopSpeech,
+  wait,
+  type Gender,
+} from "@/lib/tts";
 import type { Chunk } from "@/lib/types";
 
 type Props = {
   chunks: Chunk[];
-  voiceOptions: VoiceOption[];
-  voice: SpeechSynthesisVoice | undefined;
-  voiceUri: string;
-  onVoiceChange: (uri: string) => void;
+  gender: Gender;
+  onGenderChange: (gender: Gender) => void;
   rate: number;
   onRateChange: (rate: number) => void;
 };
 
-export default function Playback({
-  chunks,
-  voiceOptions,
-  voice,
-  voiceUri,
-  onVoiceChange,
-  rate,
-  onRateChange,
-}: Props) {
+export default function Playback({ chunks, gender, onGenderChange, rate, onRateChange }: Props) {
   const [breakMs, setBreakMs] = useState(300);
   const [active, setActive] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const supported = useSpeechSupported();
-  const stopped = useRef(false);
+  useEffect(() => () => stopSpeech(), []);
 
-  useEffect(() => {
-    return () => {
-      if (typeof window !== "undefined") window.speechSynthesis?.cancel();
-    };
-  }, []);
-
-  function stop() {
-    stopped.current = true;
-    window.speechSynthesis.cancel();
-    setActive(null);
-    setBusy(false);
-  }
-
-  async function run(fn: () => Promise<void>) {
-    if (!voiceOptions.length) {
-      setError("이 브라우저에 중국어 음성이 설치되어 있지 않습니다.");
-      return;
-    }
-    stopped.current = false;
+  async function run(fn: (gen: number) => Promise<void>) {
+    const gen = startSpeech();
     setError(null);
     setBusy(true);
-    window.speechSynthesis.cancel();
     try {
-      await fn();
+      await fn(gen);
     } catch (e) {
-      if (!stopped.current) setError(e instanceof Error ? e.message : String(e));
+      if (isCurrent(gen)) setError(e instanceof Error ? e.message : String(e));
     } finally {
       setActive(null);
       setBusy(false);
     }
   }
 
-  /** 덩어리를 한꺼번에 큐에 넣는다. 사이에 끊김이 가장 적다. */
+  const texts = chunks.map((c) => c.text);
+
   const playAll = () =>
-    run(async () => {
-      logEvent("play_all", { rate, chunks: chunks.length });
-      const last = chunks.length - 1;
-      await new Promise<void>((resolve, reject) => {
-        chunks.forEach((chunk, i) => {
-          const u = makeUtterance(chunk.text, voice, rate);
-          u.onstart = () => setActive(i);
-          if (i === last) {
-            u.onend = () => resolve();
-            u.onerror = (e) => {
-              if (e.error === "interrupted" || e.error === "canceled") resolve();
-              else reject(new Error("음성 재생에 실패했습니다."));
-            };
-          }
-          window.speechSynthesis.speak(u);
-        });
-      });
+    run(async (gen) => {
+      logEvent("play_all", { rate, breakMs, voice: gender, chunks: chunks.length });
+      await speakChunks(gen, texts, { gender, rate, breakMs }, setActive);
     });
 
   const playOne = (i: number) =>
-    run(async () => {
-      logEvent("play_chunk", { rate, index: i, text: chunks[i].text });
+    run(async (gen) => {
+      logEvent("play_chunk", { rate, voice: gender, index: i, text: texts[i] });
       setActive(i);
-      await speak(makeUtterance(chunks[i].text, voice, rate));
+      await speakChunks(gen, [texts[i]], { gender, rate, breakMs: 0 });
     });
 
   const playByChunk = () =>
-    run(async () => {
-      logEvent("play_by_chunk", { rate, breakMs, chunks: chunks.length });
-      for (let i = 0; i < chunks.length; i++) {
-        if (stopped.current) return;
+    run(async (gen) => {
+      logEvent("play_by_chunk", { rate, breakMs, voice: gender, chunks: chunks.length });
+      for (let i = 0; i < texts.length; i++) {
+        if (!isCurrent(gen)) return;
         setActive(i);
-        await speak(makeUtterance(chunks[i].text, voice, rate));
-        if (stopped.current) return;
-        await new Promise((r) => setTimeout(r, breakMs));
+        await speakChunks(gen, [texts[i]], { gender, rate, breakMs: 0 });
+        if (!isCurrent(gen)) return;
+        await wait(breakMs);
       }
     });
 
-  if (!supported) {
-    return (
-      <section className="rounded-lg border border-line bg-surface p-5 sm:p-6">
-        <h2 className="text-sm font-semibold tracking-wide text-muted">낭독</h2>
-        <p className="mt-2 text-sm text-muted">
-          이 브라우저는 음성 재생을 지원하지 않습니다. Chrome이나 Safari에서 열어 주세요.
-        </p>
-      </section>
-    );
+  function stop() {
+    stopSpeech();
+    setActive(null);
+    setBusy(false);
   }
 
   return (
     <section className="rounded-lg border border-line bg-surface p-5 sm:p-6">
       <div className="mb-4 flex flex-wrap items-center gap-2">
-        <h2 className="mr-auto text-sm font-semibold tracking-wide text-muted">
-          낭독
-        </h2>
+        <h2 className="mr-auto text-sm font-semibold tracking-wide text-muted">낭독</h2>
         <button
           onClick={playAll}
           disabled={busy}
@@ -191,38 +150,23 @@ export default function Playback({
             onChange={(e) => setBreakMs(Number(e.target.value))}
             className="mt-1 w-full accent-accent"
           />
-          <span className="mt-0.5 block text-xs text-faint">
-            &lsquo;한 덩어리씩&rsquo;에만 적용
-          </span>
         </label>
         <label className="text-sm">
           <span className="text-muted">목소리</span>
           <select
-            value={voiceUri}
-            onChange={(e) => onVoiceChange(e.target.value)}
-            disabled={!voiceOptions.length}
-            className="mt-1 w-full rounded-md border border-line bg-surface px-2 py-1.5 disabled:text-faint"
+            value={gender}
+            onChange={(e) => onGenderChange(e.target.value as Gender)}
+            className="mt-1 w-full rounded-md border border-line bg-surface px-2 py-1.5"
           >
-            {voiceOptions.length ? (
-              voiceOptions.map((o) => (
-                <option key={o.voice.voiceURI} value={o.voice.voiceURI}>
-                  {o.label}
-                </option>
-              ))
-            ) : (
-              <option>중국어 음성 없음</option>
-            )}
+            {VOICE_OPTIONS.map((o) => (
+              <option key={o.id} value={o.id}>
+                {o.label}
+              </option>
+            ))}
           </select>
           <span className="mt-0.5 block text-xs text-faint">새 단어에도 함께 적용</span>
         </label>
       </div>
-
-      {!voiceOptions.length && (
-        <p className="mt-3 text-sm text-muted">
-          중국어 음성이 없습니다. macOS는 시스템 설정 → 손쉬운 사용 → 라이브 말하기(음성 콘텐츠)에서
-          중국어 음성을 내려받으면 목록에 나타납니다.
-        </p>
-      )}
 
       {error && <p className="mt-3 text-sm text-danger">{error}</p>}
     </section>

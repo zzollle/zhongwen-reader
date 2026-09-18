@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { logEvent } from "@/lib/logging";
-import { makeUtterance, speak } from "@/lib/speech";
+import { speakChunks, startSpeech, type Gender } from "@/lib/tts";
 import type { VocabItem } from "@/lib/types";
 
 function levelLabel(item: VocabItem): string {
@@ -14,20 +14,19 @@ function levelLabel(item: VocabItem): string {
 
 type Props = {
   items: VocabItem[];
-  voice: SpeechSynthesisVoice | undefined;
+  gender: Gender;
   rate: number;
-  canSpeak: boolean;
 };
 
-export default function Vocab({ items, voice, rate, canSpeak }: Props) {
+export default function Vocab({ items, gender, rate }: Props) {
   const [speaking, setSpeaking] = useState<string | null>(null);
 
   async function say(text: string, kind: "play_word" | "play_collocation") {
-    logEvent(kind, { rate, text });
-    window.speechSynthesis.cancel();
+    logEvent(kind, { rate, voice: gender, text });
+    const gen = startSpeech();
     setSpeaking(text);
     try {
-      await speak(makeUtterance(text, voice, rate));
+      await speakChunks(gen, [text], { gender, rate, breakMs: 0 });
     } finally {
       setSpeaking((current) => (current === text ? null : current));
     }
@@ -48,17 +47,14 @@ export default function Vocab({ items, voice, rate, canSpeak }: Props) {
     <section className="rounded-lg border border-line bg-surface p-5 sm:p-6">
       <h2 className="text-sm font-semibold tracking-wide text-muted">
         새 단어 <span className="font-normal">({items.length})</span>
-        {canSpeak && (
-          <span className="ml-2 font-normal text-faint">단어나 搭配를 누르면 들립니다</span>
-        )}
+        <span className="ml-2 font-normal text-faint">단어나 搭配를 누르면 들립니다</span>
       </h2>
 
       <ul className="mt-3 divide-y divide-line">
         {items.map((item) => (
           <li key={item.word} className="py-3">
             <div className="flex flex-wrap items-baseline gap-x-3">
-              {canSpeak ? (
-                <button
+                              <button
                   onClick={() => say(item.word, "play_word")}
                   className={`han rounded-md px-1.5 py-0.5 text-2xl transition-colors ${
                     speaking === item.word ? "bg-highlight" : "hover:bg-paper"
@@ -66,9 +62,6 @@ export default function Vocab({ items, voice, rate, canSpeak }: Props) {
                 >
                   {item.word}
                 </button>
-              ) : (
-                <span className="han text-2xl">{item.word}</span>
-              )}
               <span className="text-sm text-muted">{item.pinyin}</span>
               <span className="ml-auto text-xs text-faint">{levelLabel(item)}</span>
             </div>
@@ -78,8 +71,7 @@ export default function Vocab({ items, voice, rate, canSpeak }: Props) {
 
             {item.collocations && (
               <div className="mt-2 flex flex-wrap gap-1.5">
-                {item.collocations.map((c) =>
-                  canSpeak ? (
+                {item.collocations.map((c) => (
                     <button
                       key={c}
                       onClick={() => say(c, "play_collocation")}
@@ -89,15 +81,7 @@ export default function Vocab({ items, voice, rate, canSpeak }: Props) {
                     >
                       {c}
                     </button>
-                  ) : (
-                    <span
-                      key={c}
-                      className="han rounded bg-paper px-2 py-0.5 text-sm text-accent"
-                    >
-                      {c}
-                    </span>
-                  ),
-                )}
+                ))}
               </div>
             )}
           </li>

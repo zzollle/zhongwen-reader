@@ -10,7 +10,7 @@ import Vocab from "./Vocab";
 import sample from "@/data/sample.json";
 import { MAX_CHARS } from "@/lib/limits";
 import { logEvent } from "@/lib/logging";
-import { useChineseVoices } from "@/lib/speech";
+import type { Gender } from "@/lib/tts";
 import type { Analysis } from "@/lib/types";
 
 export default function Reader() {
@@ -22,12 +22,8 @@ export default function Reader() {
   const [needCode, setNeedCode] = useState(false);
 
   // 낭독과 새 단어가 같은 목소리·속도를 쓰도록 여기서 들고 있는다.
-  const voiceOptions = useChineseVoices();
-  const [pickedVoice, setPickedVoice] = useState("");
+  const [gender, setGender] = useState<Gender>("female");
   const [rate, setRate] = useState(0.9);
-  const selected =
-    voiceOptions.find((o) => o.voice.voiceURI === pickedVoice) ?? voiceOptions[0];
-  const voice = selected?.voice;
 
   async function analyze(text: string) {
     setLoading(true);
@@ -177,10 +173,8 @@ export default function Reader() {
         <div className="space-y-5">
           <Playback
             chunks={analysis.chunks}
-            voiceOptions={voiceOptions}
-            voice={voice}
-            voiceUri={voice?.voiceURI ?? ""}
-            onVoiceChange={setPickedVoice}
+            gender={gender}
+            onGenderChange={setGender}
             rate={rate}
             onRateChange={setRate}
           />
@@ -198,9 +192,8 @@ export default function Reader() {
           <Structure analysis={analysis} />
           <Vocab
             items={analysis.vocabulary}
-            voice={voice}
+            gender={gender}
             rate={rate}
-            canSpeak={voiceOptions.length > 0}
           />
         </div>
       )}
