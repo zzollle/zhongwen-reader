@@ -145,6 +145,19 @@ async function handle(req: Request) {
     );
   }
 
+  // Anthropic 키는 모두 sk-ant-로 시작한다. 다른 서비스의 키(예: Azure)가 잘못된 칸에
+  // 들어가면 인증 실패만 뜨고 이유를 알 수 없으므로 여기서 먼저 짚는다.
+  if (!apiKey.startsWith("sk-ant-")) {
+    return NextResponse.json(
+      {
+        error:
+          `ANTHROPIC_API_KEY에 Anthropic 키가 아닌 값(${apiKey.length}자)이 들어 있습니다. ` +
+          `Anthropic 키는 sk-ant-로 시작하는 108자입니다. 다른 서비스의 키를 넣지 않았는지 확인해 주세요.`,
+      },
+      { status: 503 },
+    );
+  }
+
   const text = sentence.trim();
   const threshold = Number(process.env.KNOWN_HSK_LEVEL ?? 4);
   const key = `${threshold}:${text}`;
