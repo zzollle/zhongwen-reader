@@ -36,8 +36,9 @@ function buildSsml(chunks: string[], voice: string, rate: number, breakMs: numbe
  */
 export async function GET(req: Request) {
   const key = process.env.AZURE_SPEECH_KEY?.trim();
-  const region = process.env.AZURE_SPEECH_REGION?.trim();
-  if (!key || !region) {
+  // 지역은 비밀값이 아니고 리소스가 한국 중부에 있어 기본값으로 둔다. 다른 지역이면 환경변수로 덮는다.
+  const region = process.env.AZURE_SPEECH_REGION?.trim() || "koreacentral";
+  if (!key) {
     return NextResponse.json({ error: "음성 서버가 설정되지 않았습니다." }, { status: 503 });
   }
 

@@ -15,7 +15,7 @@ cp .env.example .env.local
 |---|---|---|
 | `ANTHROPIC_API_KEY` | console.anthropic.com → API Keys | 독해 분석. 선불 크레딧 |
 | `AZURE_SPEECH_KEY` | portal.azure.com → Speech 리소스 → 키 및 엔드포인트 | 낭독 음성. F0 무료 계층 |
-| `AZURE_SPEECH_REGION` | 위와 같은 화면 | 붙여 쓴 소문자. 예: `koreacentral` |
+| `AZURE_SPEECH_REGION` | 위와 같은 화면 | 선택. 비우면 `koreacentral` |
 | `CLASS_CODE` | 직접 정함 | 수강생·외부 이용자 구분 표시 |
 | `KNOWN_HSK_LEVEL` | 기본 `4` | 이 급수 이하는 아는 단어로 보고 제외 |
 
