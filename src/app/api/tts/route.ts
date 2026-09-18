@@ -68,9 +68,9 @@ export async function GET(req: Request) {
   if (!res.ok) {
     console.error("Azure TTS 실패", res.status, await res.text().catch(() => ""));
     // 무료 한도 초과(429) 등. 브라우저가 내장 음성으로 대신 읽는다.
-    // 원인을 짚을 수 있게 Azure 응답 번호와 키 길이만 알린다. 키 값은 드러내지 않는다.
+    // 원인을 짚을 수 있게 Azure 응답 번호를 알린다. 401이면 키 값이 잘못 들어간 것이다.
     return NextResponse.json(
-      { error: `음성 합성에 실패했습니다 (Azure ${res.status})`, keyLength: key.length },
+      { error: `음성 합성에 실패했습니다 (Azure ${res.status})` },
       { status: 502 },
     );
   }
