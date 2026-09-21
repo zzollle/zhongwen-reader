@@ -15,6 +15,10 @@
   --color-danger: #b3261e; /* 오류 */
   --color-glow: #f0e2d0; /* 바탕에 깔리는 옅은 빛 */
 
+  /* 대시보드 차트 색. 색맹 구분과 배경 대비 검사를 통과한 값이다 */
+  --color-series-class: #2a78d6; /* 수강생 */
+  --color-series-public: #eb6834; /* 외부 */
+
   --font-han: "PingFang SC", "Hiragino Sans GB", "Noto Sans SC",
     "Microsoft YaHei", system-ui, sans-serif;
 }
@@ -33,6 +37,10 @@
   --color-highlight: #5c4130;
   --color-danger: #ffa89e;
   --color-glow: #3d2a1f;
+
+  /* 어두운 바탕에 맞춰 다시 고른 단계. 밝은 값을 그대로 쓰지 않는다 */
+  --color-series-class: #3987e5;
+  --color-series-public: #d95926;
 }
 
 /* 셀렉트·슬라이더 같은 기본 컨트롤도 테마를 따라가게 한다 */
