@@ -26,8 +26,8 @@ export default function ConsentCard() {
       <h2 className="font-semibold">학습 기록 수집에 관한 안내</h2>
 
       <p className="mt-2 text-muted">
-        수업과 앱을 개선하고 교육 연구에 활용하기 위해 학습 기록을 모으고 있습니다.
-        입력한 문장, 사용 시각, 낭독 재생 기록이 대상이며{" "}
+        수업과 앱을 개선하기 위해 학습 기록을 모으고 있습니다. 입력한 문장, 사용 시각,
+        낭독 재생 기록이 대상이며{" "}
         <strong className="text-ink">이름·학번·이메일은 수집하지 않습니다.</strong>
       </p>
 
@@ -43,8 +43,9 @@ export default function ConsentCard() {
             확인할 방법이 없어, 나중에 특정인의 기록만 골라 지우는 것은 어렵습니다.
           </p>
           <p className="mt-2">
-            수집한 자료는 연구 종료 후 파기하며, 발표 시 개인을 알아볼 수 있는 형태로
-            제시하지 않습니다. 설정은 언제든 아래 버튼으로 다시 바꿀 수 있습니다.
+            모은 기록은 수업 운영과 앱 개선에만 씁니다.{" "}
+            <strong className="text-ink">연구나 외부 발표에는 사용하지 않습니다.</strong>{" "}
+            학기가 끝나면 파기하며, 설정은 언제든 아래 버튼으로 다시 바꿀 수 있습니다.
           </p>
         </div>
       )}

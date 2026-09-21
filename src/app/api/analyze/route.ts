@@ -3,7 +3,6 @@ import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { z } from "zod";
 import { NextResponse } from "next/server";
 import { hskNew, hskOld, isKnown } from "@/lib/hsk";
-import { requireClassAccess } from "@/lib/access";
 import { MAX_CHARS } from "@/lib/limits";
 import type { Analysis } from "@/lib/types";
 
@@ -105,9 +104,6 @@ export async function POST(req: Request) {
 }
 
 async function handle(req: Request) {
-  const denied = await requireClassAccess();
-  if (denied) return denied;
-
   const { sentence } = await req.json();
 
   if (typeof sentence !== "string" || !sentence.trim()) {

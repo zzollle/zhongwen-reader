@@ -59,7 +59,8 @@ export async function POST(req: Request) {
   const row = {
     subject,
     cohort,
-    research_ok: cohort === "class",
+    // 수업·앱 개선 목적으로만 동의받았다. 연구에 쓰려면 IRB 승인과 새 동의가 필요하다.
+    research_ok: false,
     event,
     sentence,
     detail: body.detail ?? null,
