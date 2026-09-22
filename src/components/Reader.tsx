@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import ConsentCard, { LoggingSettings } from "./ConsentCard";
 import Hero from "./Hero";
 import Playback from "./Playback";
@@ -22,6 +22,7 @@ export default function Reader() {
   // 낭독과 새 단어가 같은 목소리·속도를 쓰도록 여기서 들고 있는다.
   const [gender, setGender] = useState<Gender>("female");
   const [rate, setRate] = useState(0.9);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   async function analyze(text: string) {
     setLoading(true);
@@ -94,14 +95,39 @@ export default function Reader() {
         }}
         className="mb-8"
       >
-        <textarea
-          value={sentence}
-          onChange={(e) => setSentence(e.target.value)}
-          rows={3}
-          maxLength={MAX_CHARS}
-          placeholder="중국어 문장을 붙여 넣으세요"
-          className="han w-full resize-y rounded-md border border-line bg-surface p-3 text-lg placeholder:text-faint"
-        />
+        <div className="relative">
+          <textarea
+            ref={inputRef}
+            value={sentence}
+            onChange={(e) => setSentence(e.target.value)}
+            rows={3}
+            maxLength={MAX_CHARS}
+            placeholder="중국어 문장을 붙여 넣으세요"
+            className="han w-full resize-y rounded-md border border-line bg-surface p-3 pr-11 text-lg placeholder:text-faint"
+          />
+          {sentence && (
+            <button
+              type="button"
+              onClick={() => {
+                setSentence("");
+                inputRef.current?.focus();
+              }}
+              aria-label="입력한 문장 지우기"
+              title="지우기"
+              className="absolute right-2 top-2 flex size-7 items-center justify-center rounded-full text-faint transition-colors hover:bg-paper hover:text-ink"
+            >
+              <svg viewBox="0 0 16 16" aria-hidden className="size-4">
+                <path
+                  d="M4 4l8 8M12 4l-8 8"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  fill="none"
+                />
+              </svg>
+            </button>
+          )}
+        </div>
         <div className="mt-2 flex items-center gap-2">
           <button
             disabled={loading || !sentence.trim()}
